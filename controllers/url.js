@@ -7,25 +7,24 @@ import { getUser, setUser } from '../services/services.js';
 // Function to generate a shortened URL
 async function GenerateUrl(req, res) {
   try {
-    const body = req.body;
-    if (!body || !body.url) return res.status(400).json({ error: "URL is required" });
+    const  {url} = req.body;
+    if (!url || !url) return res.status(400).json({ error: "URL is required" });
 
-    const userId = req.cookies?.userId;
-    console.log("user==....", userId);
+  
+    console.log("user==....", req.user);
 
-    const userData = getUser(userId);
-    if (!userData) return res.status(401).json({ error: "Invalid or missing token" });
+    // if (!userData) return res.status(401).json({ error: "Invalid or missing token" });
 
     const shortId = nanoid(8);
-    const url = await URL.create({
+    const ShortUrl = await URL.create({
       shortId,
-      redirectUrl: body.url,
+      redirectUrl: url,
       visitHistory: [],
-      createdBy: userData.id // Assuming userData has id
+      createdBy: req.user.id // Assuming userData has id
     });
-    console.log(url);
+    console.log(ShortUrl);
 
-    return res.status(201).json({ id: shortId });
+    return res.status(201).redirect('/url');
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -52,9 +51,10 @@ async function getUrl(req, res) {
 // Clean up URLs (for development purposes)
 async function Home(req, res) {
   try {
-    const allURL = await URL.deleteMany({});
-    console.log(allURL);
-    res.render("home", { allURL });
+    console.log("..............",req.user);
+    const allURL=await URL.find({createdBy:req.user.id})
+   
+    res.render("home",{"allURL":allURL,"user":req.user});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -75,7 +75,7 @@ async function SignUp(req, res) {
     });
 
     // Generate a token with only necessary data (e.g., user ID and email)
-    const token = setUser({ id: newUser._id, email: newUser.email });
+    const token = setUser({ id: newUser._id, email: newUser.email ,name});
 
     // Set token in the cookie
     res.cookie("userId", token);
@@ -91,22 +91,21 @@ async function SignUp(req, res) {
 async function Login(req, res) {
   try {
     const { email, password } = req.body;
-
+    console.log(email,password);
+    
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email ,password});
+    console.log("user",user); 
+    
     if (!user) return res.redirect('/url/login'); // User not found
 
     // Compare the provided password with the stored hashed password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return res.redirect('/url/login'); // Invalid password
+    // const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!password) return res.redirect('/url/login'); // Invalid password
 
     // Generate token and set cookie
-    const token = setUser({ id: user._id, email: user.email });
-    res.cookie("userId", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: 'strict'
-    });
+    const token = setUser({ id: user._id, email: user.email,name:user.name });
+    res.cookie("userId", token);
 
     return res.redirect("/url");
   } catch (error) {

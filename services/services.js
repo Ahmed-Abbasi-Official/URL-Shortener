@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-
 const secret = process.env.JWT_SECRET || "Ahmed@12"; // Move to environment variable
 
 function setUser(user) {

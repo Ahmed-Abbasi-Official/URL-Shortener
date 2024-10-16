@@ -1,16 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Short URL</title>
+   <style>
+      body {
+         background-color: #021021;
+         color: #fff;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         flex-direction: column;
+         gap: 20px;
+      }
+      th,
+      td {
+         padding: 15px;
+         border: 1px solid #3c3c3c;
+         border-radius: 5px;
+         color:#dadada ;
+      }
+      a{
+         text-decoration: none;
+         color: #fff;
+      }
+      input{
+         padding: 5px 8px;
+         outline: none;
+      }
+      button{
+         padding: 5px 8px;
+         cursor: pointer;
+         font-weight: 700;
+      }
+   </style>
 </head>
+
 <body>
-   <h1>Home</h1>
-   <ul>
-      <% allURL.forEach((val) => { %>
-        <li><%= val?.redirectUrl %></li>
-      <% }) %>
-   </ul>
+
+   <h1>
+      <%=user.name%>
+   </h1>
+   <form action="/url" method="post">
+      <input type="text" name="url">
+      <button type="submit">submit</button>
+   </form>
+   <table>
+      <thead>
+         <tr>
+            <th>S.No</th>
+            <th>ShortId</th>
+            <th>Main URL</th>
+            <th>Short URL</th>
+            <th>Clicks</th>
+         </tr>
+      </thead>
+      <tbody>
+         <% allURL.forEach((val,idx)=> { %>
+            <tr>
+               <td>
+                  <%= idx+1 %>
+               </td>
+               <td>
+                  <%= val?.shortId %>
+               </td>
+               <td><a href="<%= val?.redirectUrl %>" target="_blank">
+                     <%= val?.redirectUrl %>
+                  </a></td>
+               <td>
+                  <a href="https://localhost:4000/<%=val?.shortId  %>">https://localhost:4000/<%=val?.shortId  %></a>
+               </td>
+               <td>
+                  <%= val?.visitHistory.length %>
+               </td>
+            </tr>
+            <% }) %>
+      </tbody>
+   </table>
+
+
 </body>
+
 </html>
