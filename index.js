@@ -14,7 +14,6 @@ CONNECTDB(`mongodb://localhost:27017/short-url`).then(() =>
 app.use(express.json());
 app.use(express.json());
 app.use(cookieParser())
-// app.use(express.urlencoded({ extended: true })); // To parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.use("/url", router);
